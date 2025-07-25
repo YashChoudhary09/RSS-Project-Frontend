@@ -27,7 +27,8 @@ export default function UpdateSecretePassword(){
 
     let handleSubmit =  (e) =>{
       e.preventDefault();
-      fetch("https://rss-project-backend.onrender.com/adminInfoUpdate",{
+      const BASE_URL = import.meta.env.VITE_API_URL;
+      fetch(`${BASE_URL}/adminInfoUpdate`,{
        method:"PUT",
        headers:{
         "Content-Type":"application/json",

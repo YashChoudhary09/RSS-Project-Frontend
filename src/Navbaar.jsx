@@ -10,7 +10,7 @@ export default function Navbaar() {
 
             {/* Title */}
             <h3 className="text-2xl md:text-3xl font-extrabold text-white tracking-wide drop-shadow-md">
-                Rastriya Swayamsevak Sangh
+               राष्ट्रीय स्वयंसेवक संघ 
             </h3>
 
             {/* Right Flag */}

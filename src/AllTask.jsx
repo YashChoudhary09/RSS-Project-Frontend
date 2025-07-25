@@ -10,26 +10,32 @@ import PrintAllTasks from "./PrintAllTask.jsx";
 export default function AllTask() {
   let navigate = useNavigate();
   let [taskData, setTaskData] = useState([]);
+  let [title, setTitle] = useState("");
+  let [shakhaaName, setShakhaaName] = useState("");
   let componentRef = useRef();
+  const userRole = localStorage.getItem("role");
 
- const printRef = useRef(null);
- const handlePrint = useReactToPrint({
-  contentRef: printRef,
-  documentTitle: "All-Tasks-Report",
-  onAfterPrint: () => console.log("Tasks printed."),
-  onPrintError: (err) => {
-    console.error("Task print error:", err);
-    toast.error("Print failed!");
-  },
-});
-
+  const printRef = useRef(null);
+  const handlePrint = useReactToPrint({
+    contentRef: printRef,
+    documentTitle: "All-Tasks-Report",
+    onAfterPrint: () => console.log("Tasks printed."),
+    onPrintError: (err) => {
+      console.error("Task print error:", err);
+      toast.error("Print failed!");
+    },
+  });
 
   const handleDelete = async (id) => {
-    const confirm = window.confirm("Are you sure you want to delete this task?");
+    const BASE_URL = import.meta.env.VITE_API_URL;
+
+    const confirm = window.confirm(
+      "Are you sure you want to delete this task?"
+    );
     if (!confirm) return;
 
     try {
-      const res = await fetch(`https://rss-project-backend.onrender.com/deleteTask/${id}`, {
+      const res = await fetch(`${BASE_URL}/deleteTask/${id}`, {
         method: "DELETE",
         headers: {
           Authorization: `Bearer ${localStorage.getItem("token")}`,
@@ -50,7 +56,78 @@ export default function AllTask() {
   };
 
   useEffect(() => {
-    fetch("https://rss-project-backend.onrender.com/allTask", {
+    const fetchAllTasks = () => {
+      const BASE_URL = import.meta.env.VITE_API_URL;
+
+      fetch(`${BASE_URL}/allTask`, {
+        method: "GET",
+        headers: {
+          Authorization: `Bearer ${localStorage.getItem("token")}` || "",
+        },
+      })
+        .then((res) => res.json())
+        .then((data) => {
+          console.log(data);
+          setTaskData(data.allTasks);
+        })
+        .catch((err) =>
+          console.log("Error occur during fetching tasks !", err)
+        );
+    };
+
+    // call on mount
+    fetchAllTasks();
+
+    // call again when window/tab regains focus
+    const handleFocus = () => {
+      fetchAllTasks();
+    };
+
+    window.addEventListener("focus", handleFocus);
+    if (title.trim() === "" && shakhaaName.trim() === "") {
+      handleSearch("", "");
+    }
+
+    return () => {
+      window.removeEventListener("focus", handleFocus);
+    };
+  }, [title, shakhaaName]);
+
+  let handleEdit = (id) => {
+    navigate(`/editTask/${id}`);
+  };
+
+  // handle search
+  const handleSearch = (title, shakhaaName) => {
+    const BASE_URL = import.meta.env.VITE_API_URL;
+
+    if (!title.trim() && !shakhaaName.trim()) {
+      fetch(`${BASE_URL}/allTask`, {
+        method: "GET",
+        headers: {
+          Authorization: `Bearer ${localStorage.getItem("token")}`,
+        },
+      })
+        .then((res) => res.json())
+        .then((data) => {
+          if (data.success) {
+            setTaskData(data.allTasks);
+          } else {
+            toast.error(data.message);
+          }
+        })
+        .catch((err) => {
+          console.log("Error re-fetching all tasks:", err);
+        });
+      return;
+    }
+    let query = [];
+    if (title.trim()) query.push(`title=${encodeURIComponent(title.trim())}`);
+    if (shakhaaName.trim())
+      query.push(`shakhaaName=${encodeURIComponent(shakhaaName.trim())}`);
+    let queryString = query.length ? `?${query.join("&")}` : "";
+
+    fetch(`${BASE_URL}/findTask${queryString}`, {
       method: "GET",
       headers: {
         Authorization: `Bearer ${localStorage.getItem("token")}`,
@@ -58,16 +135,17 @@ export default function AllTask() {
     })
       .then((res) => res.json())
       .then((data) => {
-        console.log(data);
-        setTaskData(data.allTasks);
+        if (data.success === true) {
+          toast.success(data.message);
+          setTaskData(data.foundedTask);
+        } else {
+          toast.error(data.message);
+        }
       })
-      .catch((err) =>
-        console.log("Error occur during fetching tasks !", err)
-      );
-  }, []);
-
-  let handleEdit = (id) => {
-    navigate(`/editTask/${id}`);
+      .catch((err) => {
+        console.log("Error during search task:", err);
+      });
+    // delay of 500ms
   };
 
   return (
@@ -75,15 +153,39 @@ export default function AllTask() {
       <Navbaar />
       <div className="p-4">
         <h2 className="text-3xl text-center font-bold text-orange-500 mb-6">
-          All Tasks
+          -- सभी कार्य --
         </h2>
+        <div className="flex justify-center">
+          {userRole === "admin" && (
+            <div className="mb-4 text-center mr-2">
+              <button
+                onClick={handlePrint}
+                className="bg-green-500 hover:bg-green-600 text-white px-4 py-2 rounded-md transition"
+              >
+                Print All Tasks
+              </button>
+            </div>
+          )}
+          <input
+            type="text"
+            placeholder="🔍 कार्य का शीर्षक लिखें !"
+            value={title}
+            onChange={(e) => setTitle(e.target.value)}
+            className="border border-orange-300 px-4 py-2 mr-2 rounded-lg shadow-sm focus:outline-none focus:ring-2 focus:ring-orange-500 mb-4"
+          />
 
-        <div className="mb-4 text-center">
+          <input
+            type="text"
+            placeholder="🔍 शाखा का नाम लिखें !"
+            value={shakhaaName}
+            onChange={(e) => setShakhaaName(e.target.value)}
+            className="border border-orange-300 px-4 py-2 mr-1rounded-lg shadow-sm focus:outline-none focus:ring-2 focus:ring-orange-500 mb-4"
+          />
           <button
-            onClick={handlePrint}
-            className="bg-green-500 hover:bg-green-600 text-white px-4 py-2 rounded-md transition"
+            onClick={() => handleSearch(title, shakhaaName)}
+            className="bg-orange-500 text-white px-4 py-2 rounded-lg ml-2 hover:bg-orange-600 mb-4"
           >
-            Print All Tasks
+            🔍 खोजें
           </button>
         </div>
 
@@ -98,16 +200,16 @@ export default function AllTask() {
                     #
                   </th>
                   <th className="px-6 py-3 text-left text-orange-600 font-semibold">
-                    Shakhaa Name
+                    शाखा
                   </th>
                   <th className="px-6 py-3 text-left text-orange-600 font-semibold">
-                    Title
+                    शीर्षक
                   </th>
                   <th className="px-6 py-3 text-left text-orange-600 font-semibold">
-                    Description
+                    विवरण
                   </th>
                   <th className="px-6 py-3 text-left text-orange-600 font-semibold">
-                    Date
+                    दिनांक
                   </th>
                   <th className="px-6 py-3 text-left text-orange-600 font-semibold"></th>
                   <th className="px-6 py-3 text-left text-orange-600 font-semibold"></th>
@@ -154,7 +256,7 @@ export default function AllTask() {
         )}
       </div>
       <div style={{ position: "absolute", top: "-10000px" }}>
-          <PrintAllTasks ref={printRef} tasks={taskData} />
+        <PrintAllTasks ref={printRef} tasks={taskData} />
       </div>
 
       <hr />

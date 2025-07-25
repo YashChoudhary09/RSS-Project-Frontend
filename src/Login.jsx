@@ -27,7 +27,8 @@ export default function Login(){
    // handle Form on Submit----
    let handleSubmit = (e) =>{
       e.preventDefault();
-      fetch("https://rss-project-backend.onrender.com/login",{
+      const BASE_URL = import.meta.env.VITE_API_URL;
+      fetch(`${BASE_URL}/login`,{
          method:"POST",
          headers:{
             'Content-Type':"application/json"
@@ -41,6 +42,7 @@ export default function Login(){
                    localStorage.setItem("token", data.token);
                    localStorage.setItem("role", data.user.role);
                    localStorage.setItem("name", data.user.name);
+                   localStorage.setItem("emailId",data.user.emailId)
                   //  go back to intended page-----
                      toast.success(data.message);
                  navigate(from, { replace: true });

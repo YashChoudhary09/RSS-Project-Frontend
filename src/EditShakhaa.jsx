@@ -12,13 +12,22 @@ export default function Editshakhaa(){
     let navigate = useNavigate();
    let {id } = useParams();
    let[input,setInput] = useState({
-    jila: "", nagar: "", basti: "", shakhaaName: "",
-    adminName: "", contactNumber: "", address: "", role: ""
+    vibhaag:"",jila: "", nagar: "", basti: "", shakhaaName: "",
+    adminName: [], contactNumber: [], address: [], role: []
    });
-
+  
+    // handle Inputs---
+  let handleInput = (e) => {
+    setInput((prevData) => ({
+      ...prevData,
+      [e.target.name]: e.target.value,
+    }));
+  };
 //    find shakhaa----
      useEffect(() =>{
-        fetch(`https://rss-project-backend.onrender.com/findOneShakhaa/${id}`,{
+      const BASE_URL = import.meta.env.VITE_API_URL;
+
+        fetch(`${BASE_URL}/findOneShakhaa/${id}`,{
             method:"GET",
             headers:{
                   "Authorization": `Bearer ${localStorage.getItem("token")}`,
@@ -41,8 +50,9 @@ export default function Editshakhaa(){
 // update shakhaa---
 let handleUpdate = (e) =>{
  e.preventDefault();
-
-  fetch(`https://rss-project-backend.onrender.com/updateShakhaa/${id}`,{
+  
+ const BASE_URL = import.meta.env.VITE_API_URL;
+  fetch(`${BASE_URL}/updateShakhaa/${id}`,{
     method:"PUT",
     headers:{
         "Content-Type":"application/json",
@@ -53,215 +63,301 @@ let handleUpdate = (e) =>{
      .then(data => {
         if(data.success === true){
                   toast.success(data.message);
+                    navigate("/allShakhaa");
                  } else{
                   toast.error(data.message);
                  }
-      navigate("/allShakhaa");
+    
       })
       .catch(err => console.error("Update error", err));
 }
-
+// handle admins----
+  let addAdmin = () => {
+    setInput((prev) => ({
+      ...prev,
+      adminName: [...prev.adminName, ""],
+    }));
+  };
+  let handleAdminChange = (e, index) => {
+    const values = [...input.adminName];
+    values[index] = e.target.value;
+    setInput((prev) => ({
+      ...prev,
+      adminName: values,
+    }));
+  };
+  let removeAdmin = (index) => {
+    const values = [...input.adminName];
+    values.splice(index, 1);
+    setInput((prev) => ({
+      ...prev,
+      adminName: values,
+    }));
+  };
+  // handle contactNumbers --
+  let addContactNumbers = () => {
+    setInput((prevData) => ({
+      ...prevData,
+      contactNumber: [...prevData.contactNumber, 0],
+    }));
+  };
+  let handleContactChange = (e, index) => {
+    const values = [...input.contactNumber];
+    values[index] = e.target.value;
+    setInput((prev) => ({
+      ...prev,
+      contactNumber: values,
+    }));
+  };
+  let removeContactNumber = (index) => {
+    const values = [...input.contactNumber];
+    values.splice(index, 1);
+    setInput((prev) => ({
+      ...prev,
+      contactNumber: values,
+    }));
+  };
+  //  handle address-
+  let addAddress = () => {
+    setInput((prev) => ({
+      ...prev,
+      address: [...prev.address, " "],
+    }));
+  };
+  let handleAddressChange = (e, index) => {
+    const values = [...input.address];
+    values[index] = e.target.value;
+    setInput((prev) => ({
+      ...prev,
+      address: values,
+    }));
+  };
+  let removeAddress = (index) => {
+    const values = [...input.address];
+    values.splice(index, 1);
+    setInput((prev) => ({
+      ...prev,
+      address: values,
+    }));
+  };
+  //  handle role-
+  let addRole = () => {
+    setInput((prev) => ({
+      ...prev,
+      role: [...prev.role, " "],
+    }));
+  };
+  let handleRoleChange = (e, index) => {
+    const values = [...input.role];
+    values[index] = e.target.value;
+    setInput((prev) => ({
+      ...prev,
+      role: values,
+    }));
+  };
+  let removeRole = (index) => {
+    const values = [...input.role];
+    values.splice(index, 1);
+    setInput((prev) => ({
+      ...prev,
+      role: values,
+    }));
+  };
    return(
     <>
     <Navbaar/>
     <div>
           <div className="flex justify-center mt-1">
-                 <h1 className="text-3xl ">Update Shakhaa</h1>
+                 <h1 className="text-3xl ">शाखा का नवीनीकरण</h1>
             </div>
             <hr />
-        <form onSubmit={handleUpdate}>
-            <div className="flex justify-evenly items-center">
-                         
-                            <div>
-                               <TextField id="outlined-basic" 
-                               label="Enter Jila Name" variant="outlined"
-                                value={input.jila} onChange={(e) => setInput({ ...input, jila: e.target.value })} 
-                                sx={{
-                                   mt:2,   
-                                  width: '100%',
-                                  '& label.Mui-focused': {
-                                  color: '#f6ad55',
-                                   },
-                                '& .MuiOutlinedInput-root': {
-                                        '& fieldset': {
-                                         borderColor: '#f4a261', // default
-                                            },
-                                        '&:hover fieldset': {
-                                        borderColor: '#fb923c', // hover (slightly darker)
-                                            },
-                                       '&.Mui-focused fieldset': {
-                                        borderColor: '#f6ad55', // focus - light kesari
-                                            },
-                                       },
-                                    }}
-                               />
-                               <hr />
-                               <TextField id="outlined-basic" 
-                               label="Enter nagar" variant="outlined"
-                                value={input.nagar} onChange={(e) => setInput({ ...input, nagar: e.target.value })} 
-                                sx={{
-                                   mt:2,   
-                                  width: '100%',
-                                  '& label.Mui-focused': {
-                                  color: '#f6ad55',
-                                   },
-                                '& .MuiOutlinedInput-root': {
-                                        '& fieldset': {
-                                         borderColor: '#f4a261', // default
-                                            },
-                                        '&:hover fieldset': {
-                                        borderColor: '#fb923c', // hover (slightly darker)
-                                            },
-                                       '&.Mui-focused fieldset': {
-                                        borderColor: '#f6ad55', // focus - light kesari
-                                            },
-                                       },
-                                    }}
-                               />
-                               <hr />
-                               <TextField id="outlined-basic"
-                                label="Enter basti" variant="outlined"
-                               value={input.basti} onChange={(e) => setInput({ ...input, basti: e.target.value })} 
-                                sx={{
-                                   mt:2,   
-                                  width: '100%',
-                                  '& label.Mui-focused': {
-                                  color: '#f6ad55',
-                                   },
-                                '& .MuiOutlinedInput-root': {
-                                        '& fieldset': {
-                                         borderColor: '#f4a261', // default
-                                            },
-                                        '&:hover fieldset': {
-                                        borderColor: '#fb923c', // hover (slightly darker)
-                                            },
-                                       '&.Mui-focused fieldset': {
-                                        borderColor: '#f6ad55', // focus - light kesari
-                                            },
-                                       },
-                                    }}
-                               />
-                               <hr />
-                               <TextField id="outlined-basic"
-                                label="Enter shakhaa-name" variant="outlined"
-                               value={input.shakhaaName} onChange={(e) => setInput({ ...input, shakhaaName: e.target.value })} 
-                                sx={{
-                                   mt:2,   
-                                  width: '100%',
-                                  '& label.Mui-focused': {
-                                  color: '#f6ad55',
-                                   },
-                                '& .MuiOutlinedInput-root': {
-                                        '& fieldset': {
-                                         borderColor: '#f4a261', // default
-                                            },
-                                        '&:hover fieldset': {
-                                        borderColor: '#fb923c', // hover (slightly darker)
-                                            },
-                                       '&.Mui-focused fieldset': {
-                                        borderColor: '#f6ad55', // focus - light kesari
-                                            },
-                                       },
-                                    }}
-                               />
-                               <hr />
-                            </div>
-                            <div>
-                              <TextField id="outlined-basic" 
-                              label="enter karykerta-name" variant="outlined"
-                           value={input.adminName} onChange={(e) => setInput({ ...input, adminName: e.target.value })}
-                               sx={{
-                                   mt:2,   
-                                  width: '100%',
-                                  '& label.Mui-focused': {
-                                  color: '#f6ad55',
-                                   },
-                                '& .MuiOutlinedInput-root': {
-                                        '& fieldset': {
-                                         borderColor: '#f4a261', // default
-                                            },
-                                        '&:hover fieldset': {
-                                        borderColor: '#fb923c', // hover (slightly darker)
-                                            },
-                                       '&.Mui-focused fieldset': {
-                                        borderColor: '#f6ad55', // focus - light kesari
-                                            },
-                                       },
-                                    }}
+             <form onSubmit={handleUpdate}>
+                  <div className="flex flex-col lg:flex-row lg:justify-evenly lg:items-start gap-8 mt-4">
+                    {/* Left Section (Basic Info) */}
+                    <div className="w-full lg:w-1/2">
+                       <TextField
+                        label="विभाग"
+                        variant="outlined"
+                        name="vibhaag"
+                        value={input.vibhaag}
+                        onChange={handleInput}
+                        fullWidth
+                        sx={{
+                          mt: 2,
+                          "& label.Mui-focused": { color: "#f6ad55" },
+                          "& .MuiOutlinedInput-root": {
+                            "& fieldset": { borderColor: "#f4a261" },
+                            "&:hover fieldset": { borderColor: "#fb923c" },
+                            "&.Mui-focused fieldset": { borderColor: "#f6ad55" },
+                          },
+                        }}
+                      />
+                      <TextField
+                        label="जिला"
+                        variant="outlined"
+                        name="jila"
+                        value={input.jila}
+                        onChange={handleInput}
+                        fullWidth
+                        sx={{
+                          mt: 2,
+                          "& label.Mui-focused": { color: "#f6ad55" },
+                          "& .MuiOutlinedInput-root": {
+                            "& fieldset": { borderColor: "#f4a261" },
+                            "&:hover fieldset": { borderColor: "#fb923c" },
+                            "&.Mui-focused fieldset": { borderColor: "#f6ad55" },
+                          },
+                        }}
+                      />
+                      <TextField
+                        label="नगर"
+                        variant="outlined"
+                        name="nagar"
+                        value={input.nagar}
+                        onChange={handleInput}
+                        fullWidth
+                        sx={{
+                          mt: 2,
+                          "& label.Mui-focused": { color: "#f6ad55" },
+                          "& .MuiOutlinedInput-root": {
+                            "& fieldset": { borderColor: "#f4a261" },
+                            "&:hover fieldset": { borderColor: "#fb923c" },
+                            "&.Mui-focused fieldset": { borderColor: "#f6ad55" },
+                          },
+                        }}
+                      />
+                      <TextField
+                        label="बस्ती"
+                        variant="outlined"
+                        name="basti"
+                        value={input.basti}
+                        onChange={handleInput}
+                        fullWidth
+                        sx={{
+                          mt: 2,
+                          "& label.Mui-focused": { color: "#f6ad55" },
+                          "& .MuiOutlinedInput-root": {
+                            "& fieldset": { borderColor: "#f4a261" },
+                            "&:hover fieldset": { borderColor: "#fb923c" },
+                            "&.Mui-focused fieldset": { borderColor: "#f6ad55" },
+                          },
+                        }}
+                      />
+                      <TextField
+                        label="शाखा"
+                        variant="outlined"
+                        name="shakhaaName"
+                        value={input.shakhaaName}
+                        onChange={handleInput}
+                        fullWidth
+                        sx={{
+                          mt: 2,
+                          "& label.Mui-focused": { color: "#f6ad55" },
+                          "& .MuiOutlinedInput-root": {
+                            "& fieldset": { borderColor: "#f4a261" },
+                            "&:hover fieldset": { borderColor: "#fb923c" },
+                            "&.Mui-focused fieldset": { borderColor: "#f6ad55" },
+                          },
+                        }}
+                      />
+                    </div>
+            
+                    {/* Right Section (Dynamic Fields) */}
+                    <div className="w-full lg:w-1/2">
+                      {/* Buttons Row */}
+                      <div className="flex flex-wrap gap-3 mb-4">
+                        <Button variant="outlined" onClick={addAdmin} color="primary">
+                         कार्य़कर्ता जोडे़
+                        </Button>
+                        <Button variant="outlined" onClick={addContactNumbers} color="primary">
+                        सम्पर्क जोडे़
+                        </Button>
+                        <Button variant="outlined" onClick={addAddress} color="primary">
+                       पता जोडे़
+                        </Button>
+                        <Button variant="outlined" onClick={addRole} color="primary">
+                       दायित्व जोडे़
+                        </Button>
+                      </div>
+            
+                      {/* Grid Layout for Dynamic Sections */}
+                      <div className="grid grid-cols-2 gap-6">
+                        {/* Admins */}
+                        <div>
+                          <h2 className="text-lg font-semibold mb-2">कार्य़कर्ता</h2>
+                          {input.adminName.map((admin, index) => (
+                            <div key={index} className="flex items-center gap-2 mb-2">
+                              <TextField
+                                label={`Admin ${index + 1}`}
+                                value={admin}
+                                onChange={(e) => handleAdminChange(e, index)}
+                                fullWidth
                               />
-                               <hr />
-                               <TextField id="outlined-basic" 
-                               label="Enter contact-number" variant="outlined"
-                              value={input.contactNumber} onChange={(e) => setInput({ ...input, contactNumber: e.target.value })}
-                                 sx={{
-                                   mt:2,   
-                                  width: '100%',
-                                  '& label.Mui-focused': {
-                                  color: '#f6ad55',
-                                   },
-                                '& .MuiOutlinedInput-root': {
-                                        '& fieldset': {
-                                         borderColor: '#f4a261', // default
-                                            },
-                                        '&:hover fieldset': {
-                                        borderColor: '#fb923c', // hover (slightly darker)
-                                            },
-                                       '&.Mui-focused fieldset': {
-                                        borderColor: '#f6ad55', // focus - light kesari
-                                            },
-                                       },
-                                    }}
-                               />
-                               <hr />
-                               <TextField id="outlined-basic"
-                               label="Enter address" variant="outlined" 
-                              value={input.address} onChange={(e) => setInput({ ...input, address: e.target.value })} 
-                                 sx={{
-                                   mt:2,   
-                                  width: '100%',
-                                  '& label.Mui-focused': {
-                                  color: '#f6ad55',
-                                   },
-                                '& .MuiOutlinedInput-root': {
-                                        '& fieldset': {
-                                         borderColor: '#f4a261', // default
-                                            },
-                                        '&:hover fieldset': {
-                                        borderColor: '#fb923c', // hover (slightly darker)
-                                            },
-                                       '&.Mui-focused fieldset': {
-                                        borderColor: '#f6ad55', // focus - light kesari
-                                            },
-                                       },
-                                    }}
-                               />
-                               <hr />
-                               <TextField id="outlined-basic"
-                                label="Enter role" variant="outlined"
-                             value={input.role} onChange={(e) => setInput({ ...input, role: e.target.value })} 
-                                 sx={{
-                                   mt:2,   
-                                  width: '100%',
-                                  '& label.Mui-focused': {
-                                  color: '#f6ad55',
-                                   },
-                                '& .MuiOutlinedInput-root': {
-                                        '& fieldset': {
-                                         borderColor: '#f4a261', // default
-                                            },
-                                        '&:hover fieldset': {
-                                        borderColor: '#fb923c', // hover (slightly darker)
-                                            },
-                                       '&.Mui-focused fieldset': {
-                                        borderColor: '#f6ad55', // focus - light kesari
-                                            },
-                                       },
-                                    }}
-                               />
-                               <hr />
+                              <Button color="error" onClick={() => removeAdmin(index)}>
+                                Remove
+                              </Button>
                             </div>
+                          ))}
                         </div>
-                       <hr />
+            
+                        {/* Contact Numbers */}
+                        <div>
+                          <h2 className="text-lg font-semibold mb-2">सम्पर्क</h2>
+                          {input.contactNumber.map((num, index) => (
+                            <div key={index} className="flex items-center gap-2 mb-2">
+                              <TextField
+                                label={`Number ${index + 1}`}
+                                value={num}
+                                onChange={(e) => handleContactChange(e, index)}
+                                fullWidth
+                              />
+                              <Button color="error" onClick={() => removeContactNumber(index)}>
+                                Remove
+                              </Button>
+                            </div>
+                          ))}
+                        </div>
+            
+                        {/* Addresses */}
+                        <div>
+                          <h2 className="text-lg font-semibold mb-2">पता</h2>
+                          {input.address.map((addr, index) => (
+                            <div key={index} className="flex items-center gap-2 mb-2">
+                              <TextField
+                                label={`Address ${index + 1}`}
+                                value={addr}
+                                onChange={(e) => handleAddressChange(e, index)}
+                                fullWidth
+                              />
+                              <Button color="error" onClick={() => removeAddress(index)}>
+                                Remove
+                              </Button>
+                            </div>
+                          ))}
+                        </div>
+            
+                        {/* Roles */}
+                        <div>
+                          <h2 className="text-lg font-semibold mb-2">दायित्व</h2>
+                          {input.role.map((role, index) => (
+                            <div key={index} className="flex items-center gap-2 mb-2">
+                              <TextField
+                                label={`Role ${index + 1}`}
+                                value={role}
+                                onChange={(e) => handleRoleChange(e, index)}
+                                fullWidth
+                              />
+                              <Button color="error" onClick={() => removeRole(index)}>
+                                Remove
+                              </Button>
+                            </div>
+                          ))}
+                        </div>
+                      </div>
+                    </div>
+                  </div>
+            
+       <hr />
                           <div className="flex justify-center">
                               <Button variant="contained"  type="submit" style={{marginTop:"2rem" ,color:"orange"}}>Update</Button>
                           </div>

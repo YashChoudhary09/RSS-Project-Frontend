@@ -12,6 +12,7 @@ import EditTask from "./EditTask.jsx";
 import { ToastContainer } from "react-toastify";
 import "react-toastify/dist/ReactToastify.css";
 import Home from "./Home.jsx";
+import UserInfo from "./UserInfo.jsx";
 
  function App() {
  
@@ -24,6 +25,11 @@ import Home from "./Home.jsx";
         <Route path="/" element={<Home/>}></Route>
         <Route path="/login" element={<Login/>}></Route>
         <Route path="/signUp" element={<SignUp/>}></Route>
+         <Route path="/userInfo" element={
+           <ProtectedRoute >
+            <UserInfo/>
+          </ProtectedRoute>
+        }></Route>
         <Route path="/updatePassword" element={
            <ProtectedRoute role={"admin"}>
             <UpdateSecretePassword/>

@@ -17,7 +17,8 @@ export default function EditTask(){
 
 //    find shakhaa----
      useEffect(() =>{
-        fetch(`https://rss-project-backend.onrender.com/findOneTask/${id}`,{
+      const BASE_URL = import.meta.env.VITE_API_URL;
+        fetch(`${BASE_URL}/findOneTask/${id}`,{
             method:"GET",
             headers:{
                   "Authorization": `Bearer ${localStorage.getItem("token")}`,
@@ -41,7 +42,8 @@ export default function EditTask(){
 let handleUpdate = (e) =>{
  e.preventDefault();
 
-  fetch(`https://rss-project-backend.onrender.com/editTask/${id}`,{
+ const BASE_URL = import.meta.env.VITE_API_URL;
+  fetch(`${BASE_URL}/editTask/${id}`,{
     method:"PUT",
     headers:{
         "Content-Type":"application/json",
@@ -61,7 +63,7 @@ let handleUpdate = (e) =>{
     <Navbaar/>
     <div>
           <div className="flex justify-center mt-1">
-                 <h1 className="text-3xl ">Update Task</h1>
+                 <h1 className="text-3xl ">कार्य का नवीनीकरण</h1>
             </div>
             <hr />
         <form onSubmit={handleUpdate}>
@@ -69,7 +71,7 @@ let handleUpdate = (e) =>{
                          
                             <div>
                                <TextField id="outlined-basic" 
-                               label="Enter Title Name" variant="outlined"
+                               label="शीर्षक" variant="outlined"
                                 value={input.title} onChange={(e) => setInput({ ...input, title: e.target.value })} 
                                 sx={{
                                    mt:2,   
@@ -92,7 +94,7 @@ let handleUpdate = (e) =>{
                                />
                                <hr />
                                <TextField id="outlined-basic" 
-                               label="Enter Description" variant="outlined"
+                               label="विवरण" variant="outlined"
                                 value={input.description} onChange={(e) => setInput({ ...input, description: e.target.value })} 
                                 sx={{
                                    mt:2,   
@@ -115,7 +117,7 @@ let handleUpdate = (e) =>{
                                />
                                <hr />
                                <TextField id="outlined-basic"
-                                label="Enter ShakhaaName" variant="outlined"
+                                label="शाखा" variant="outlined"
                                value={input.shakhaaName} onChange={(e) => setInput({ ...input, shakhaaName: e.target.value })} 
                                 sx={{
                                    mt:2,   

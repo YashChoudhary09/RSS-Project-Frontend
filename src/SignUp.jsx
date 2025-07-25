@@ -29,7 +29,8 @@ export default function SignUp(){
    // handle formSubmition----
    let handleSubmit = (e)=>{
       e.preventDefault();
-     fetch("https://rss-project-backend.onrender.com/register",{
+      const BASE_URL = import.meta.env.VITE_API_URL;
+     fetch(`${BASE_URL}/register`,{
       method:"POST",
       headers:{
          "Content-Type":"application/json",

@@ -28,7 +28,8 @@ export default function TaskAdd(){
         // handel form submission--
         let handleSubmit = (e) =>{
             e.preventDefault();
-            fetch("https://rss-project-backend.onrender.com/task",{
+            const BASE_URL = import.meta.env.VITE_API_URL;
+            fetch(`${BASE_URL}/task`,{
                 method:"POST",
                 headers:{
                     "Content-Type":"application/json",
@@ -56,7 +57,7 @@ export default function TaskAdd(){
         <div>
             <Navbaar />
             <div className="flex justify-center mt-1">
-                 <h1 className="text-3xl ">Create New Task</h1>
+                 <h1 className="text-3xl ">कार्य जोङे</h1>
             </div>
             <hr />
             <form onSubmit={handleSubmit}>
@@ -64,7 +65,7 @@ export default function TaskAdd(){
              
                 <div>
                    <TextField id="outlined-basic" 
-                   label="Enter title" variant="outlined"
+                   label="शीर्षक" variant="outlined"
                    name="title" value={input.title} onChange={handleinput}
                     sx={{
                        mt:2,   
@@ -87,7 +88,7 @@ export default function TaskAdd(){
                    />
                    <hr />
                    <TextField id="outlined-basic" 
-                   label="Enter discription" variant="outlined"
+                   label="विवरण" variant="outlined"
                   name="description" value={input.description} onChange={handleinput}
                     sx={{
                        mt:2,   
@@ -110,7 +111,7 @@ export default function TaskAdd(){
                    />
                    <hr />
                    <TextField id="outlined-basic" 
-                   label="Enter shakhaa name" variant="outlined"
+                   label="शाखा" variant="outlined"
                   name="shakhaaName" value={input.shakhaaName} onChange={handleinput}
                     sx={{
                        mt:2,   

@@ -14,7 +14,7 @@ const PrintAllTasks = forwardRef(({ tasks = [] }, ref) => {
     <div ref={ref} className="p-4 print:p-0 bg-white text-black">
       {/* Heading */}
       <h1 className="text-2xl font-bold text-center mb-4">
-        All Tasks Report
+       सभी कार्य सूची 
       </h1>
       <p className="text-center text-sm text-gray-500 mb-6">
         Printed: {stamp} &middot; Total Tasks: {tasks.length}
@@ -25,10 +25,10 @@ const PrintAllTasks = forwardRef(({ tasks = [] }, ref) => {
         <thead className="bg-orange-100">
           <tr>
             <th className="border border-gray-400 px-2 py-1">#</th>
-            <th className="border border-gray-400 px-2 py-1">Shakhaa</th>
-            <th className="border border-gray-400 px-2 py-1">Title</th>
-            <th className="border border-gray-400 px-2 py-1">Description</th>
-            <th className="border border-gray-400 px-2 py-1">Date</th>
+            <th className="border border-gray-400 px-2 py-1">शाखा</th>
+            <th className="border border-gray-400 px-2 py-1">शीर्षक </th>
+            <th className="border border-gray-400 px-2 py-1">विवरण </th>
+            <th className="border border-gray-400 px-2 py-1">दिनांक </th>
           </tr>
         </thead>
         <tbody>
