@@ -115,9 +115,9 @@ export default function AllShakhaa() {
     // If input is empty, fetch all shakhaa again
     fetch(`${BASE_URL}/allShakhaaInfo`, {
       method: "GET",
-      headers: {
-        Authorization: `Bearer ${localStorage.getItem("token")}`,
-      },
+      // headers: {
+      //   Authorization: `Bearer ${localStorage.getItem("token")}`,
+      // },
     })
       .then((res) => res.json())
       .then((data) => {
@@ -136,9 +136,6 @@ export default function AllShakhaa() {
   // Else, search specific shakhaa
   fetch(`${BASE_URL}/findShakhaa/${name}`, {
     method: "GET",
-    headers: {
-      Authorization: `Bearer ${localStorage.getItem("token")}`,
-    },
   })
     .then((res) => res.json())
     .then((data) => {
