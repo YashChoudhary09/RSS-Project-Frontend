@@ -14,6 +14,7 @@ export default function AllTask() {
   let [shakhaaName, setShakhaaName] = useState("");
   let componentRef = useRef();
   const userRole = localStorage.getItem("role");
+   const [loading,setLoading] = useState(false);
 
   const printRef = useRef(null);
   const handlePrint = useReactToPrint({
@@ -33,7 +34,7 @@ export default function AllTask() {
       "Are you sure you want to delete this task?"
     );
     if (!confirm) return;
-
+    setLoading(true);
     try {
       const res = await fetch(`${BASE_URL}/deleteTask/${id}`, {
         method: "DELETE",
@@ -52,13 +53,15 @@ export default function AllTask() {
     } catch (err) {
       console.error("Error deleting task:", err);
       toast.error("Failed to delete 😥");
+    } finally{
+      setLoading(false);
     }
   };
 
   useEffect(() => {
     const fetchAllTasks = () => {
       const BASE_URL = import.meta.env.VITE_API_URL;
-
+       setLoading(true);
       fetch(`${BASE_URL}/allTask`, {
         method: "GET",
         headers: {
@@ -72,7 +75,8 @@ export default function AllTask() {
         })
         .catch((err) =>
           console.log("Error occur during fetching tasks !", err)
-        );
+        )
+        .finally(()=>setLoading(false));
     };
 
     // call on mount
@@ -102,6 +106,7 @@ export default function AllTask() {
     const BASE_URL = import.meta.env.VITE_API_URL;
 
     if (!title.trim() && !shakhaaName.trim()) {
+      setLoading(true);
       fetch(`${BASE_URL}/allTask`, {
         method: "GET",
         headers: {
@@ -118,7 +123,9 @@ export default function AllTask() {
         })
         .catch((err) => {
           console.log("Error re-fetching all tasks:", err);
-        });
+        })
+         .finally(()=>setLoading(false));
+        
       return;
     }
     let query = [];
@@ -126,7 +133,7 @@ export default function AllTask() {
     if (shakhaaName.trim())
       query.push(`shakhaaName=${encodeURIComponent(shakhaaName.trim())}`);
     let queryString = query.length ? `?${query.join("&")}` : "";
-
+    setLoading(true);
     fetch(`${BASE_URL}/findTask${queryString}`, {
       method: "GET",
       headers: {
@@ -144,13 +151,29 @@ export default function AllTask() {
       })
       .catch((err) => {
         console.log("Error during search task:", err);
-      });
+      })
+       .finally(()=>setLoading(false));
     // delay of 500ms
   };
+
+   // 🔄 रियूजेबल बटन स्पिनर कंपोनेंट (ताकि कोड साफ सुथरा रहे)
+  const ButtonSpinner = () => (
+    <svg className="animate-spin h-5 w-5 text-white inline mr-2" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
+      <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4"></circle>
+      <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
+    </svg>
+  );
 
   return (
     <div>
       <Navbaar />
+      {loading && (
+        <div className="fixed inset-0 bg-black bg-opacity-30 flex items-center justify-center z-50">
+          <div className="bg-white p-4 rounded-lg shadow-lg font-bold text-orange-600 animate-bounce">
+            लोडिंग हो रहा है...
+          </div>
+        </div>
+      )}
       <div className="p-4">
         <h2 className="text-3xl text-center font-bold text-orange-500 mb-6">
           -- सभी कार्य --
@@ -182,10 +205,11 @@ export default function AllTask() {
             className="border border-orange-300 px-4 py-2 mr-1rounded-lg shadow-sm focus:outline-none focus:ring-2 focus:ring-orange-500 mb-4"
           />
           <button
+            disabled={loading}
             onClick={() => handleSearch(title, shakhaaName)}
             className="bg-orange-500 text-white px-4 py-2 rounded-lg ml-2 hover:bg-orange-600 mb-4"
           >
-            🔍 खोजें
+            {loading ? <ButtonSpinner/> :"🔍 खोजें"}
           </button>
         </div>
 
@@ -234,18 +258,20 @@ export default function AllTask() {
                     </td>
                     <td className="px-6 py-4">
                       <button
+                         disabled={loading}
                         onClick={() => handleDelete(task._id)}
                         className="text-red-600 hover:text-red-800 font-semibold"
                       >
-                        🗑️ Delete
+                          {loading ? <ButtonSpinner/> :"🗑️ Delete"}
                       </button>
                     </td>
                     <td className="px-6 py-4">
                       <button
+                        disabled={loading}
                         onClick={() => handleEdit(task._id)}
                         className="text-blue-600 font-semibold hover:underline"
                       >
-                        ✏️ Edit
+                      {loading ? <ButtonSpinner/> :"✏️ Edit"} 
                       </button>
                     </td>
                   </tr>

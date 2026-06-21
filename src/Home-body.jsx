@@ -6,7 +6,7 @@ import AccountBoxIcon from '@mui/icons-material/AccountBox';
 
 export default function HomeBody() {
   const navigate = useNavigate();
-
+ 
   const token = localStorage.getItem("token");
   const userRole = localStorage.getItem("role");
 
@@ -18,7 +18,7 @@ export default function HomeBody() {
     localStorage.removeItem("token");
     localStorage.removeItem("role");
     localStorage.removeItem("name");
-    localStorage.removeItem("emailID");
+    localStorage.removeItem("emailId");
     toast.success("Logged out successfully!");
     navigate("/login");
   };

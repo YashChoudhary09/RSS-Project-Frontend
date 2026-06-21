@@ -17,6 +17,7 @@ export default function UpdateSecretePassword(){
       newSecret:"",
     })
     
+    const [loading,setLoading] = useState(false);
 
     let handleInput = (e) =>{
       setInput((prevData) =>({
@@ -28,6 +29,7 @@ export default function UpdateSecretePassword(){
     let handleSubmit =  (e) =>{
       e.preventDefault();
       const BASE_URL = import.meta.env.VITE_API_URL;
+      setLoading(true);
       fetch(`${BASE_URL}/adminInfoUpdate`,{
        method:"PUT",
        headers:{
@@ -54,8 +56,15 @@ export default function UpdateSecretePassword(){
         }).catch((err) =>{
           console.log("Error occur during update admin profile : ",err);
         })
-
+         .finally(() =>setLoading(false));
     }
+    // 🔄 रियूजेबल बटन स्पिनर कंपोनेंट (ताकि कोड साफ सुथरा रहे)
+  const ButtonSpinner = () => (
+    <svg className="animate-spin h-5 w-5 text-white inline mr-2" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
+      <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4"></circle>
+      <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
+    </svg>
+  );
     return(
         <>
         <Navbaar/>
@@ -194,7 +203,7 @@ export default function UpdateSecretePassword(){
                                     }}
                             />
                  <hr />
-              <Button variant="contained" type="submit" style={{marginTop:"2rem" ,color:"orange"}}>Submit</Button>
+              <Button disabled={loading}variant="contained" type="submit" style={{marginTop:"2rem" ,color:"orange"}}>{loading ? <ButtonSpinner/> : "Submit"}</Button>
               <hr />
             </form>
         </div>

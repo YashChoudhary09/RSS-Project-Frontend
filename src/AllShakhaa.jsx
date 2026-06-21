@@ -14,6 +14,7 @@ export default function AllShakhaa() {
   const [images, setImages] = useState([]);
   const componentRef = useRef(null);
   const userRole = localStorage.getItem("role");
+  const [loading,setLoading] = useState(false);
 
   const handlePrint = useReactToPrint({
     contentRef: componentRef, // 👈 v3 way
@@ -30,50 +31,46 @@ export default function AllShakhaa() {
     console.log("Print Ref on mount:", componentRef.current);
   }, [data]);
 
-  // Fetching data
+ // Fetching data
   useEffect(() => {
     const BASE_URL = import.meta.env.VITE_API_URL;
+    setLoading(true);
 
-    fetch(`${BASE_URL}/allShakhaaInfo`, {
-      method: "GET",
-      headers: {
-        Authorization: `Bearer ${localStorage.getItem("token")}`,
-      },
-    })
-      .then((res) => res.json())
-      .then((data) => {
-        if (data.success) {
-          setData(data.allShakhaa);
+    // दोनों APIs को एक साथ हैंडल करने के लिए Promise.all का उपयोग करना बेहतर है ताकि लोडिंग सही समय पर बंद हो
+    Promise.all([
+      fetch(`${BASE_URL}/allShakhaaInfo`, {
+        method: "GET",
+        headers: { Authorization: `Bearer ${localStorage.getItem("token")}` },
+      }).then((res) => res.json()),
+      
+      fetch(`${BASE_URL}/allshakhaaImages`, {
+        method: "GET",
+        headers: { Authorization: `Bearer ${localStorage.getItem("token")}` },
+      }).then((res) => res.json())
+    ])
+      .then(([shakhaaData, imageData]) => {
+        // Handle Shakhaa Info
+        if (shakhaaData.success) {
+          setData(shakhaaData.allShakhaa);
         } else {
-          toast.error(data.message);
+          toast.error(shakhaaData.message);
         }
-        console.log("allShakhaaInfo:", data);
+
+        // Handle Images
+        if (imageData.success) {
+          setImages(imageData.images);
+        } else {
+          toast.error(imageData.message);
+        }
       })
       .catch((err) => {
-        console.error("Error fetching shakhaa info:", err);
-      });
-
-    fetch(`${BASE_URL}/allshakhaaImages`, {
-      method: "GET",
-      headers: {
-        Authorization: `Bearer ${localStorage.getItem("token")}`,
-      },
-    })
-      .then((res) => res.json())
-      .then((data) => {
-        if (data.success) {
-          setImages(data.images);
-        } else {
-          toast.error(data.message);
-        }
-        console.log("allShakhaaImages:", data);
+        console.error("Error fetching data:", err);
+        toast.error("डेटा लोड करने में समस्या आई!");
       })
-      .catch((err) => {
-        console.error("Error fetching images:", err);
-        toast.error("Something went wrong while fetching images!");
+      .finally(() => {
+        setLoading(false); // 👈 यहाँ पर सही तरीके से लोडिंग बंद होगी, चाहे सक्सेस हो या एरर
       });
   }, []);
-  
   // handle serach--
   
 
@@ -85,7 +82,7 @@ export default function AllShakhaa() {
       "Are you sure you want to delete this shakhaa?"
     );
     if (!confirmDelete) return;
-
+    setLoading(true);
     try {
       const res = await fetch(`${BASE_URL}/deleteShakhaa/${id}`, {
         method: "DELETE",
@@ -100,59 +97,72 @@ export default function AllShakhaa() {
       } else {
         toast.success(result.message || "Deleted successfully");
         setData((prev) => prev.filter((item) => item._id !== id));
-      }
+      } 
+      
     } catch (err) {
       console.error("Error deleting shakhaa:", err);
       toast.error("Failed to delete 😥");
-    }
-  };
+    } finally{
+        setLoading(false);
+  }};
 
   // search shakhaa--
  const handleSearch = (name) => {
   const BASE_URL = import.meta.env.VITE_API_URL;
-
-  if (!name.trim()) {
-    // If input is empty, fetch all shakhaa again
+  
+  // 1. अगर इनपुट पूरी तरह खाली है (या सिर्फ स्पेस है)
+  if (!name || !name.trim()) {
+    setLoading(true);
+    
     fetch(`${BASE_URL}/allShakhaaInfo`, {
       method: "GET",
-      // headers: {
-      //   Authorization: `Bearer ${localStorage.getItem("token")}`,
-      // },
+      headers: {
+        Authorization: `Bearer ${localStorage.getItem("token")}`, // 👈 टोकन भेजना ज़रूरी है
+      },
     })
       .then((res) => res.json())
       .then((data) => {
-        if (data.success) {
-          setData(data.allShakhaa);
+        console.log("Re-fetched all data:", data); // डिबग के लिए
+        if (data.success && data.allShakhaa) {
+          setData(data.allShakhaa); // 👈 सभी शाखाएं वापस स्टेट में सेट होंगी
         } else {
-          toast.error(data.message);
+          toast.error(data.message || "डेटा लोड करने में विफल");
         }
       })
       .catch((err) => {
-        console.log("Error re-fetching all shakhaa:", err);
+        console.error("Error re-fetching all shakhaa:", err);
+        toast.error("नेटवर्क त्रुटि!");
+      })
+      .finally(() => {
+        setLoading(false);
       });
-    return;
+    return; // फंक्शन को यहीं रोक दें
   }
 
-  // Else, search specific shakhaa
+  // 2. अगर इनपुट में कुछ लिखा है, तो सर्च API चलाएं
+  setLoading(true);
   fetch(`${BASE_URL}/findShakhaa/${name}`, {
     method: "GET",
+    headers: {
+      Authorization: `Bearer ${localStorage.getItem("token")}`, // यहाँ भी टोकन सुरक्षित रखें
+    },
   })
     .then((res) => res.json())
     .then((data) => {
-      if (data.success === true) {
-        toast.success(data.message);
+      if (data.success === true && data.foundedShakhaa) {
         setData(data.foundedShakhaa);
       } else {
-        toast.error(data.message);
-        setData([]); // optional: show no data found
+        // यदि कोई शाखा नहीं मिली, तो डेटा खाली करें ताकि स्क्रीन पर पुराना डेटा न दिखे
+        setData([]); 
       }
     })
     .catch((err) => {
-      console.log("Error during search shakhaa:", err);
+      console.error("Error during search shakhaa:", err);
+    })
+    .finally(() => {
+      setLoading(false);
     });
 };
-
-
   // Delete image
   const handleDeleteImage = async (id) => {
     const BASE_URL = import.meta.env.VITE_API_URL;
@@ -161,7 +171,7 @@ export default function AllShakhaa() {
       "Are you sure you want to delete this picture?"
     );
     if (!confirmDelete) return;
-
+      setLoading(true);
     try {
       const res = await fetch(`${BASE_URL}/deleteShakhaa/images/${id}`, {
         method: "DELETE",
@@ -178,10 +188,12 @@ export default function AllShakhaa() {
         toast.success(data.message || "Deleted successfully");
         setImages((prev) => prev.filter((img) => img._id !== id));
         setSelectedImage(null);
-      }
+      } 
     } catch (err) {
       toast.error("Image delete failed 😥");
       console.error(err);
+    } finally{
+      setLoading(false);
     }
   };
 
@@ -189,9 +201,23 @@ export default function AllShakhaa() {
     navigate(`/editShakhaa/${id}`);
   };
 
+  // 🔄 रियूजेबल बटन स्पिनर कंपोनेंट (ताकि कोड साफ सुथरा रहे)
+  const ButtonSpinner = () => (
+    <svg className="animate-spin h-5 w-5 text-white inline mr-2" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
+      <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4"></circle>
+      <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
+    </svg>
+  );
   return (
     <div>
       <Navbaar />
+      {loading && (
+        <div className="fixed inset-0 bg-black bg-opacity-30 flex items-center justify-center z-50">
+          <div className="bg-white p-4 rounded-lg shadow-lg font-bold text-orange-600 animate-bounce">
+            लोडिंग हो रहा है...
+          </div>
+        </div>
+      )}
       <div className="p-4">
         <h2 className="text-3xl text-center font-bold mb-6 text-orange-500">
         -- सभी शाखाय़े --
@@ -297,17 +323,20 @@ export default function AllShakhaa() {
             </div>
             {/* Edit & Delete Buttons at Top-Right */}
             <div className=" flex gap-3 justify-center mt-2">
+           
               <button
                 onClick={() => handleEdit(item._id)}
+                disabled={loading}
                 className="px-3 py-1 bg-blue-500 text-white rounded hover:bg-blue-600 transition"
-              >
-                ✏️ Edit
+              > {loading ? <ButtonSpinner /> : "✏️ Edit"}
+                {/* {loading ? "Wait...":"✏️ Edit"} */}
               </button>
               <button
                 onClick={() => handleDelete(item._id)}
+                disabled={loading}
                 className="px-3 py-1 bg-red-500 text-white rounded hover:bg-red-600 transition"
-              >
-                🗑️ Delete
+              >  {loading ? <ButtonSpinner /> : "🗑️ Delete"}
+                 {/* {loading ? "Deleting...":"🗑️ Delete"} */}
               </button>
             </div>
           </div>
@@ -368,13 +397,14 @@ export default function AllShakhaa() {
                   className="max-w-[90vw] max-h-[90vh] rounded-lg shadow-xl border-4 border-white"
                 />
                 <button
+                disabled={loading}
                   className="absolute top-2 right-2 bg-red-600 text-white px-3 py-1 rounded hover:bg-red-700 shadow-lg"
                   onClick={(e) => {
                     e.stopPropagation();
                     handleDeleteImage(selectedImage.id);
                   }}
-                >
-                  🗑️ Delete
+                > {loading ? <ButtonSpinner /> : "🗑️ Delete"}
+                  {/* {loading ? "Deleting...":"🗑️ Delete"} */}
                 </button>
               </div>
             </div>
